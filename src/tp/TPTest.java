@@ -31,8 +31,9 @@ public class TPTest {
         System.out.println(Arrays.toString(tp));
     }
 
+    @Test
     public void test2() throws Exception {
-        final Elemento[][] elementos = new Elemento[4][4];
+        final Elemento[][] elementos = new Elemento[3][4];
         elementos[0][0] = new Elemento('B', 8);
         elementos[0][1] = new Elemento('A', 3);
         elementos[0][2] = new Elemento('A', 5);

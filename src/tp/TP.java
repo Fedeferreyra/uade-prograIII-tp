@@ -2,8 +2,6 @@ package tp;
 
 public class TP {
 
-    int valorOptimo;
-
     public Posicion[] tp(Elemento[][] matriz, Posicion inicio, Posicion fin) throws Exception {
         if (matriz.length > inicio.x && matriz[0].length > inicio.y) {
             if (matriz.length > fin.x && matriz[0].length > fin.y) {
@@ -21,11 +19,9 @@ public class TP {
         valorParcial += matriz[actual.x][actual.y].getValor();
         visitadas[nivel] = actual;
         if (actual.x == fin.x && actual.y == fin.y) {
-            if (valorParcial > valorOptimo) {
-                final Posicion[] posiciones = new Posicion[nivel + 1];
-                posiciones[nivel] = actual;
-                return posiciones;
-            }
+            final Posicion[] posiciones = new Posicion[nivel + 1];
+            posiciones[nivel] = actual;
+            return posiciones;
         }
         if (actual.y > 0) {
             final Posicion aVisitar = new Posicion(actual.x, actual.y - 1);
