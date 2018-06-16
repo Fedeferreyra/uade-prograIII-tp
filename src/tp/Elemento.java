@@ -24,4 +24,12 @@ public class Elemento {
     public void setValor(int valor) {
         this.valor = valor;
     }
+
+    @Override
+    public String toString() {
+        return "Elemento{" +
+                "puedeMover=" + puedeMover +
+                ", valor=" + valor +
+                '}';
+    }
 }

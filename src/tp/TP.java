@@ -1,108 +1,97 @@
 package tp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.StringTokenizer;
+
 public class TP {
 
-    public Posicion[] tp(Elemento[][] matriz, Posicion inicio, Posicion fin) throws Exception {
-        if (matriz.length > inicio.x && matriz[0].length > inicio.y) {
-            if (matriz.length > fin.x && matriz[0].length > fin.y) {
-                return caminoOptimo(inicio, matriz, new Posicion[1000], 0, fin, 0);
-            } else {
-                throw new Exception("Fin esta fuera de la matriz");
-            }
-        } else {
-            throw new Exception("Inicio esta fuera de la matriz");
-        }
+    public static void main(String[] args) throws Exception {
+        inicializar();
+
     }
 
-    private Posicion[] caminoOptimo(Posicion actual, Elemento[][] matriz, Posicion[] visitadas, int valorParcial, Posicion fin, int nivel) {
-        Posicion[][] results = new Posicion[4][matriz.length * matriz[0].length];
-        valorParcial += matriz[actual.x][actual.y].getValor();
-        visitadas[nivel] = actual;
-        if (actual.x == fin.x && actual.y == fin.y) {
-            final Posicion[] posiciones = new Posicion[nivel + 1];
-            posiciones[nivel] = actual;
-            return posiciones;
-        }
-        if (actual.y > 0) {
-            final Posicion aVisitar = new Posicion(actual.x, actual.y - 1);
-            if (esVisitable(aVisitar, matriz, visitadas, nivel)) {
-                final Posicion[] camino = caminoOptimo(aVisitar, matriz, visitadas, valorParcial, fin, nivel + 1);
-                if (camino != null) {
-                    results[0] = addPosicionActual(actual, nivel, camino);
+    private static void inicializar() throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-                }
-            }
+        System.out.println("Ingrese la ruta al archivo: ");
+
+        String path = br.readLine();
+
+        System.out.println("Ingrese el valor en el eje x del inicio: ");
+
+        Integer inicioX = Integer.parseInt(br.readLine());
+
+        System.out.println("Ingrese el valor en el eje y del inicio: ");
+
+        Integer inicioY = Integer.parseInt(br.readLine());
+
+        final Posicion inicio = new Posicion(inicioX, inicioY);
+
+        System.out.println("Ingrese el valor en el eje x del fin: ");
+
+        Integer finX = Integer.parseInt(br.readLine());
+
+        System.out.println("Ingrese el valor en el eje y del fin: ");
+
+        Integer finY = Integer.parseInt(br.readLine());
+
+        final Posicion fin = new Posicion(finX, finY);
+
+        final Elemento[][] elementos = parseFile(path);
+
+        final Posicion[] buscar = new BuscadorCaminoOptimo().buscar(elementos, inicio, fin);
+        if (buscar != null) {
+
+            System.out.println(buscar.length);
+            System.out.println(Arrays.toString(buscar));
+        }else {
+            System.out.println("No se encontro solucion");
         }
-        if (actual.x > 0) {
-            final Posicion aVisitar = new Posicion(actual.x - 1, actual.y);
-            if (esVisitable(aVisitar, matriz, visitadas, nivel)) {
-                final Posicion[] camino = caminoOptimo(aVisitar, matriz, visitadas, valorParcial, fin, nivel + 1);
-                if (camino != null) {
-                    results[1] = addPosicionActual(actual, nivel, camino);
-                }
-            }
-        }
-        if (actual.y < matriz[actual.x].length - 1) {
-            final Posicion aVisitar = new Posicion(actual.x, actual.y + 1);
-            if (esVisitable(aVisitar, matriz, visitadas, nivel)) {
-                final Posicion[] camino = caminoOptimo(aVisitar, matriz, visitadas, valorParcial, fin, nivel + 1);
-                if (camino != null) {
-                    results[2] = addPosicionActual(actual, nivel, camino);
-                }
-            }
-        }
-        if (actual.x < matriz.length - 1) {
-            final Posicion aVisitar = new Posicion(actual.x + 1, actual.y);
-            if (esVisitable(aVisitar, matriz, visitadas, nivel)) {
-                final Posicion[] camino = caminoOptimo(aVisitar, matriz, visitadas, valorParcial, fin, nivel + 1);
-                if (camino != null) {
-                    results[3] = addPosicionActual(actual, nivel, camino);
-                }
-            }
-        }
-        return getMejorResultado(matriz, results);
+
+
     }
 
-    private Posicion[] getMejorResultado(Elemento[][] matriz, Posicion[][] results) {
-        int valorOptimo = 0;
-        Posicion[] caminoOptimo = null;
-        for (int i = 0; i < results.length; i++) {
-            int suma = 0;
-            for (int j = 0; j < results[i].length; j++) {
-                if (results[i][j] != null) {
-                    final Posicion posicion = results[i][j];
-                    suma += matriz[posicion.x][posicion.y].getValor();
+    public static Elemento[][] parseFile(String path) throws IOException {
+        String content = new String(Files.readAllBytes(Paths.get(path)));
+
+        final Integer xLength = Integer.parseInt(content.substring(0, 1));
+        final Integer yLength = Integer.parseInt(content.substring(2, 3));
+
+        final Elemento[][] matriz = new Elemento[yLength][xLength];
+
+        final StringTokenizer tokens = new StringTokenizer(content, "(");
+
+        int fila = 0;
+        int columna = 0;
+        while (tokens.hasMoreTokens()) {
+            final String token = tokens.nextToken();
+            if (token.lastIndexOf("A") >= 0 || token.lastIndexOf("B") >= 0) {
+
+                final String accesible = token.substring(0, token.lastIndexOf(","));
+
+                final String valor = token.substring(token.lastIndexOf(",") + 1, token.lastIndexOf(")"));
+
+                Integer integer = 0;
+                if (!Objects.equals(valor, "X")) {
+                    integer = Integer.parseInt(valor);
                 }
-                if (suma > valorOptimo) {
-                    valorOptimo = suma;
-                    caminoOptimo = results[i];
+                final Elemento elemento = new Elemento(accesible.charAt(0), integer);
+
+                matriz[columna][fila] = elemento;
+                columna++;
+                if (token.lastIndexOf(" ") >= 0) {
+                    fila++;
+                    columna = 0;
+
                 }
             }
         }
-        return caminoOptimo;
-    }
-
-    private Posicion[] addPosicionActual(Posicion actual, int nivel, Posicion[] camino) {
-        if (camino[nivel + 1] != null) {
-            camino[nivel] = actual;
-        } else {
-            camino[nivel] = null;
-        }
-        return camino;
-    }
-
-
-    private boolean esVisitable(Posicion actual, Elemento[][] matriz, Posicion[] visitadas, int nivel) {
-        return nuncaFueVisitada(actual, visitadas, nivel) && matriz[actual.x][actual.y].getPuedeMover() == 'A';
-    }
-
-    private boolean nuncaFueVisitada(Posicion actual, Posicion[] visitadas, int nivel) {
-        for (int i = 0; i < nivel; i++) {
-            Posicion visitada = visitadas[i];
-            if (actual.x == visitada.x && actual.y == visitada.y) {
-                return false;
-            }
-        }
-        return true;
+        return matriz;
     }
 }
