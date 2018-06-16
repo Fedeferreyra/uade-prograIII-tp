@@ -48,9 +48,9 @@ public class TP {
         final Posicion[] buscar = new BuscadorCaminoOptimo().buscar(elementos, inicio, fin);
         if (buscar != null) {
 
-            System.out.println(buscar.length);
+            System.out.println("Se recorrieron las siguientes " + buscar.length + " posiciones");
             System.out.println(Arrays.toString(buscar));
-        }else {
+        } else {
             System.out.println("No se encontro solucion");
         }
 
